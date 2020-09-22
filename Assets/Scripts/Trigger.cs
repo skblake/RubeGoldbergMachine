@@ -4,37 +4,41 @@ using UnityEngine;
 
 public class Trigger : MonoBehaviour
 {
-    public Transform cameraTransform; 
-    Transform cameraFocusTarget;
+    public int machineStage = 0;
+    public GameObject camera;
+    public GameObject circle;
+    bool cameraFollow = true;
 
     //runs when something with a Rigidbody2D enters the trigger
     void OnTriggerEnter2D(Collider2D activator) {
+        Debug.Log ("entered");
+        if (activator.gameObject.tag == "Player") {
+            Debug.Log("player entered");
+            cameraFollow = false;
+            switch (machineStage) {
+                case 0:
+                    cameraFollow = true;
+                    break;
 
-        //often using activator.name like this is useful for debugging
-        //notice that "activator" is just the name of the parameter
-        Debug.Log(activator.name + " entered this trigger!");
+                case 1:
+                    camera.GetComponent<Camera>().orthographicSize = 27;
+                    camera.transform.position = new Vector3(0f, -19f, -10f);
+                    break;
 
-        //start camera following this object
-        cameraFocusTarget = activator.transform; 
-    }
+                default:
+                    Debug.Log("machineStage out of range");
+                    break;
 
-    //runs when something with a Rigidbody2D exits the trigger
-    void OnTriggerExit2D(Collider2D activator) {
-
-        //if this object exited the trigger, stop making the camera
-        //follow it.
-        if (activator.transform == cameraFocusTarget)
-            cameraFocusTarget = null;
+            }
+        }
     }
 
     void Update() {
         
         //make sure the camera has something to follow
-        if (cameraFocusTarget != null) {
-            //move the camera to focus the object that entered the trigger, 
-            //every frame
-            cameraTransform.position = cameraFocusTarget.position +
-                new Vector3(0f, 0f, -10f);
+        if (cameraFollow) {
+            camera.transform.position = new Vector3 
+                (circle.transform.position.x, circle.transform.position.y, -10);
         }
     }
 }
